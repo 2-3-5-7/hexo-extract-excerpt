@@ -1,6 +1,6 @@
 {
   "name": "hexo-extract-excerpt",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "The excerpt will be automatically extracted based on the configured number of characters when <!--more--> is not present",
   "homepage": "https://github.com/2-3-5-7/hexo-extract-excerpt#readme",
   "main": "index.js",

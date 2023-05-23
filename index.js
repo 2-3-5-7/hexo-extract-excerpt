@@ -1,40 +1,49 @@
 const { convert } = require('html-to-text');
-(function(){
-    const sanitize = function (post) {
-        const content = convert(
-            post,{
-              selectors: [
-                { selector: 'img', format: 'skip' },
+const cheerio = require('cheerio');
+
+hexo.extend.filter.register('after_post_render', function (post) {
+	// already added <!--more-->
+	if (post.excerpt.length > 0) {
+		return post;
+	}
+
+	const excerptLength = hexo.config.excerpt_length || 400;
+	const txt = convert(
+			post.content, {
+			selectors: [
+				{ selector: 'img', format: 'skip' },
 				{ selector: 'figure', format: 'skip' },
 				{ selector: 'pre.mermaid', format: 'skip' },
-                { selector: 'a', options: { ignoreHref: true } },
-                { selector: 'ul', options: { itemPrefix: '- ' } },
-                { selector: 'h1', options: { uppercase: false } },
-                { selector: 'h2', options: { uppercase: false } },
-                { selector: 'h3', options: { uppercase: false } },
-                { selector: 'h4', options: { uppercase: false } },
-                { selector: 'h5', options: { uppercase: false } },
-                { selector: 'h6', options: { uppercase: false } },
-                { selector: 'table', options: { uppercaseHeaderCells: false } }
-              ]
-            }
-        );
-        return content;
-    }
-
-    hexo.extend.filter.register('after_post_render', function (data) {
-        if (data.excerpt.length > 0) {
-            return data;
-        }
-		//console.log(sanitize('<pre class="mermaid">test string</pre>'));
-
-		const excerptLength = hexo.config.excerpt_length || 400;
-		const post = sanitize(data.content);
-		if (post.length > excerptLength) {
-			const excerpt = post.substr(0, excerptLength);
-			data.excerpt = excerpt + '...';
+				{ selector: 'a', options: { ignoreHref: true } },
+				{ selector: 'ul', options: { itemPrefix: '- ' } },
+				{ selector: 'h1', options: { uppercase: false } },
+				{ selector: 'h2', options: { uppercase: false } },
+				{ selector: 'h3', options: { uppercase: false } },
+				{ selector: 'h4', options: { uppercase: false } },
+				{ selector: 'h5', options: { uppercase: false } },
+				{ selector: 'h6', options: { uppercase: false } },
+				{ selector: 'table', options: { uppercaseHeaderCells: false } }
+			]
 		}
+	);
 
-        return data;
-    });
-})();
+	// short posts
+	if (txt.length < excerptLength) {
+		return post;
+	}
+
+	post.excerpt = '<p>' + txt.substring(0, excerptLength) + ' ...</p>';
+
+	if (hexo.config.excerpt_img_selector) {
+		const $ = cheerio.load(post.content);
+		const img = $(hexo.config.excerpt_img_selector);
+		// center the img
+		img.attr('style', 'display: block;margin: auto;')
+		// add to the beginning
+		post.excerpt = (img.prop('outerHTML') ?? '') + post.excerpt;
+		if (img.attr('class')?.toLowerCase() === 'mermaid')
+			post.excerpt += `<script type="module"> import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.esm.min.mjs';	mermaid.initialize({startOnLoad: true, flowchart: {curve: 'linear'}}); </script>`;
+	}
+
+	return post;
+});

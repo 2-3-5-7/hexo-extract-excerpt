@@ -1,7 +1,7 @@
 {
   "name": "hexo-extract-excerpt",
-  "version": "1.0.1",
-  "description": "The excerpt will be automatically extracted based on the configured number of characters when <!--more--> is not present",
+  "version": "1.2.0",
+  "description": "Generate an excerpt by extracting text and images from posts based on configuration when <!--more--> is not present",
   "homepage": "https://github.com/2-3-5-7/hexo-extract-excerpt#readme",
   "main": "index.js",
   "scripts": {
@@ -11,11 +11,12 @@
     "hexo",
     "excerpt",
     "more",
-	"auto"
+    "auto"
   ],
   "author": "Jian-Feng Du",
   "license": "MIT",
   "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
     "html-to-text": "^9.0.5"
   },
   "peerDependencies": {
